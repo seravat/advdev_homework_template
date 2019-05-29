@@ -20,9 +20,7 @@ oc new-app jenkins-persistent \
 --param VOLUME_CAPACITY=4Gi
 
 # Create custom agent container image with skopeo
-oc new-build -D $'FROM quay.io/repository/openshift/origin-jenkins-agent-maven:4.1.0\n
-      USER root\nRUN yum -y install skopeo && yum clean all\n
-      USER 1001' --name=jenkins-agent-appdev -n ${GUID}-jenkins
+oc new-build -D $'FROM quay.io/repository/openshift/origin-jenkins-agent-maven:4.1.0\nUSER root\nRUN yum -y install skopeo && yum clean all\nUSER 1001' --name=jenkins-agent-appdev -n ${GUID}-jenkins
 
 
 # Create pipeline build config pointing to the ${REPO} with contextDir `openshift-tasks`
