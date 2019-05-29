@@ -83,7 +83,7 @@ podTemplate(
 
         // TBD: Publish to Nexus
         sh "${mvnCmd} deploy versions:set -DnewVersion=${devTag} -DskipTests \
-        -DaltDeploymentRepository=nexus::default::http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com/repository/releases"
+        -DaltDeploymentRepository=nexus::default::http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com/repository/releases/jtavares"
       }
 
       // Build the OpenShift Image in OpenShift and tag it.
@@ -95,7 +95,7 @@ podTemplate(
           // Use the Default Cluster
           openshift.withCluster() {
              openshift.withProject("${GUID}-tasks-dev") {
-                openshift.selector("bc", "tasks").startBuild("--from-file=http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com/repository/releases/org/jboss/quickstarts/eap/tasks/${devTag}/tasks-${devTag}.war",
+                openshift.selector("bc", "tasks").startBuild("--from-file=http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com/repository/releases/jtavares/org/jboss/quickstarts/eap/tasks/${devTag}/tasks-${devTag}.war",
                  "--wait=true")
                 // Tag the image using the devTag.
                 openshift.tag("tasks:latest", "tasks:${devTag}")
