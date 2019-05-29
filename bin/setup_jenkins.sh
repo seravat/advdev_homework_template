@@ -20,7 +20,7 @@ oc new-app jenkins-persistent \
 --param VOLUME_CAPACITY=4Gi
 
 # Create custom agent container image with skopeo
-oc new-build -D $'FROM openshift/origin-jenkins-agent-maven:4.1.0\n
+oc new-build -D $'FROM quay.io/openshift/origin-jenkins-agent-maven:4.1.0\n
       USER root\nRUN yum -y install skopeo && yum clean all\n
       USER 1001' --name=jenkins-agent-appdev -n ${GUID}-jenkins
 
