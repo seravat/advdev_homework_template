@@ -13,14 +13,12 @@ CLUSTER=$3
 echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cluster ${CLUSTER}"
 
 # Set up Jenkins with sufficient resources
-oc new-project ${GUID}-jenkins --display-name='Shared Jenkins'
-
 oc new-app jenkins-persistent \
 --param MEMORY_LIMIT=2Gi \
 --param VOLUME_CAPACITY=4Gi
 
 # Create custom agent container image with skopeo
-oc new-build -D $'FROM quay.io/openshift/origin-jenkins-agent-maven:4.1.0\n
+oc new-build -D $'FROM docker.io/openshift/jenkins-agent-maven-35-centos7:v3.11\n
       USER root\nRUN yum -y install skopeo && yum clean all\n
       USER 1001' --name=jenkins-agent-appdev -n ${GUID}-jenkins
 
@@ -28,33 +26,22 @@ oc new-build -D $'FROM quay.io/openshift/origin-jenkins-agent-maven:4.1.0\n
 # Create pipeline build config pointing to the ${REPO} with contextDir `openshift-tasks`
 echo "apiVersion: v1
 items:
-- kind: "BuildConfig"
-  apiVersion: "v1"
-  metadata:
-    name: "tasks-pipeline"
-  spec:
-    source:
-      type: "Git"
-      git:
-        uri: "https://github.com/seravat/advdev_homework_template"
-      contextDir: /openshift-tasks
-    strategy:
-      type: "JenkinsPipeline"
-      jenkinsPipelineStrategy:
-        jenkinsfilePath: Jenkinsfile
-        env:
-          - name: CONTEXT_DIR
-            value: /openshift-tasks
-          - name: MAVEN_MIRROR_URL
-            value: "http://nexus3.gpte-hw-cicd.svc.cluster.local:8081/repository/all-maven-public"
-          - name: GUID
-          - name: REPO
-            value: "https://github.com/seravat/advdev_homework_template"
-          - name: CLUSTER
-            value: "master.na311.openshift.opentlc.com"
+  - kind: \"BuildConfig\"
+    apiVersion: \"v1\"
+    metadata:
+      name: \"tasks-pipeline\"
+    spec:
+      source:
+        type: \"Git\"
+        git:
+          uri: \"${REPO}\"
+        contextDir: \"openshift-tasks\"
+      strategy:
+        type: \"JenkinsPipeline\"
+        jenkinsPipelineStrategy:
+          jenkinsfilePath: Jenkinsfile
 kind: List
-metadata: []
-" | oc create -f - -n ${GUID}-jenkins
+metadata: []" | oc create -f - -n ${GUID}-jenkins
 
 
 # Make sure that Jenkins is fully up and running before proceeding!
