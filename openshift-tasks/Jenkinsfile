@@ -190,6 +190,9 @@ podTemplate(
               echo "The running App is ${activeApp}"
               destApp = activeApp == 'tasks-green' ? 'tasks-blue' : 'tasks-green'
 
+              openshift.set("env", "dc/tasks-green", "VERSION='${prodTag} (tasks-green)'")
+              openshift.set("env", "dc/tasks-blue", "VERSION='${prodTag} (tasks-blue)'")
+
               //Update the image on PRD DC
               def destDC = openshift.selector("dc", "${destApp}").object()
               echo "Prod Tag: ${prodTag}"
