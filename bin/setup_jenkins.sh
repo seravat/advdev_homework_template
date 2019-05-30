@@ -14,7 +14,7 @@ echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cl
 
 # Set up Jenkins with sufficient resources
 oc new-app jenkins-persistent \
---param MEMORY_LIMIT=2Gi \
+--param MEMORY_LIMIT=3Gi \
 --param VOLUME_CAPACITY=4Gi -n ${GUID}-jenkins
 
 # Create custom agent container image with skopeo
