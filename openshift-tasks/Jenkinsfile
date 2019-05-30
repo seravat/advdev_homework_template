@@ -49,7 +49,7 @@ podTemplate(
         echo "Building version ${devTag}"
 
         // TBD: Execute Maven Build
-        sh "${mvnCmd} clean install -DskipTests"
+        sh "${mvnCmd} clean versions:set -DnewVersion=${devTag} install -DskipTests"
       }
 
       // TBD: The next two stages should run in parallel
