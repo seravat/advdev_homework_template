@@ -224,14 +224,16 @@ podTemplate(
       }
 
       stage('Switch over to new Version') {
-        echo "Switching Production application to ${destApp}."
-        script {
-            openshift.withCluster() {
-                openshift.withProject(prodProject) {
-                    openshift.patch("route/tasks", "'{\"spec\":{\"to\":{\"name\":\"${destApp}\"}}}'")
-                }
-            }
-        }
+          echo "Switching Production application to ${destApp}."
+          // DONE: Execute switch
+          script {
+          openshift.withCluster() {
+              openshift.withProject("${GUID}-tasks-prod") {
+              def route = openshift.selector("route", "tasks").object()
+              route.spec.to.name="${destApp}"
+              openshift.apply(route)
+              }
+          }
       }
     }
   }
