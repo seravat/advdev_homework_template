@@ -115,6 +115,7 @@ podTemplate(
             openshift.withProject("${GUID}-tasks-dev") {
 
               openshift.set("image", "dc/tasks", "tasks=docker-registry.default.svc:5000/${GUID}-tasks-dev/tasks:${devTag}")
+              openshift.set("env", "dc/tasks", "VERSION='${devTag} (tasks-dev)'")
 
               //Update the config maps with the potentially changed properties files
               openshift.selector('configmap', 'tasks-config').delete()
