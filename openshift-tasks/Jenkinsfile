@@ -141,26 +141,25 @@ podTemplate(
       // Copy Image to Nexus container registry
       stage('Copy Image to Nexus container registry') {
 
-        steps{
-          echo "Copy image to Nexus container registry"
-          
-          // TBD: Copy image to Nexus container registry
-          // Use skopeo to copy
-          sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds jtavares-redhat.com:\$(oc whoami -t) \
-          --dest-creds admin:redhat \
-          docker://docker-registry.default.svc:5000/${devProject}/tasks:${devTag} \
-          docker://nexus-registry.gpte-hw-cicd.svc.cluster.local:5000/tasks:${devTag}"
+        echo "Copy image to Nexus container registry"
+        
+        // TBD: Copy image to Nexus container registry
+        // Use skopeo to copy
+        sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds jtavares-redhat.com:\$(oc whoami -t) \
+        --dest-creds admin:redhat \
+        docker://docker-registry.default.svc:5000/${devProject}/tasks:${devTag} \
+        docker://nexus-registry.gpte-hw-cicd.svc.cluster.local:5000/tasks:${devTag}"
 
-          // TBD: Tag the built image with the production tag.
-          script {
-            openshift.withCluster() {
-              openshift.withProject("${prodProject}") {
-                openshift.tag("${devProject}/tasks:${devTag}", "${devProject}/tasks:${prodTag}")
-                echo "Prod Tag: ${prodTag}"
-              }
+        // TBD: Tag the built image with the production tag.
+        script {
+          openshift.withCluster() {
+            openshift.withProject("${prodProject}") {
+              openshift.tag("${devProject}/tasks:${devTag}", "${devProject}/tasks:${prodTag}")
+              echo "Prod Tag: ${prodTag}"
             }
           }
         }
+
       }
 
       // Blue/Green Deployment into Production
@@ -173,7 +172,6 @@ podTemplate(
         //      Set Image, Set VERSION
         //      Deploy into the other application
         //      Make sure the application is running and ready before proceeding
-        steps {
         echo "Blue/Green Deployment"
 
         // TBD: 1. Determine which application is active
@@ -223,7 +221,6 @@ podTemplate(
           }
         }
 
-
       }
 
       stage('Switch over to new Version') {
@@ -236,7 +233,6 @@ podTemplate(
             }
         }
       }
-    }
     }
   }
   }
