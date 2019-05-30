@@ -265,6 +265,20 @@ podTemplate(
           }
         }
       }
+
+      stage('Switch to blue') {
+        echo "Switching Production application to ${destApp}."
+        script {
+          openshift.withCluster() {
+              openshift.withProject(prodProject) {
+
+                def route = openshift.selector("route", "tasks").object()
+                route.spec.to.name = "tasks-blue"
+                openshift.apply(route)
+              }
+          }
+        }
+      }
     }
   }
 }
