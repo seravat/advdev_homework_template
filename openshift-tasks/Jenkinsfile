@@ -114,7 +114,7 @@ podTemplate(
           openshift.withCluster() {
             openshift.withProject("${GUID}-tasks-dev") {
 
-              openshift.set("image", "dc/tasks", "tasks=image-registry.openshift-image-registry.svc:5000/${GUID}-tasks-dev/tasks:${devTag}")
+              openshift.set("image", "dc/tasks", "tasks=docker-registry.default.svc:5000/${GUID}-tasks-dev/tasks:${devTag}")
 
               //Update the config maps with the potentially changed properties files
               openshift.selector('configmap', 'tasks-config').delete()
@@ -148,8 +148,8 @@ podTemplate(
           // Use skopeo to copy
           sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds jtavares-redhat.com:\$(oc whoami -t) \
           --dest-creds admin:redhat \
-          docker://image-registry.openshift-image-registry.svc:5000/${devProject}/tasks:${devTag} \
-          docker://https://nexus-registry.gpte-hw-cicd.svc.cluster.local:5000/tasks:${devTag}"
+          docker://docker-registry.default.svc:5000/${devProject}/tasks:${devTag} \
+          docker://nexus-registry.gpte-hw-cicd.svc.cluster.local:5000/tasks:${devTag}"
 
           // TBD: Tag the built image with the production tag.
           script {
@@ -195,7 +195,7 @@ podTemplate(
               //Update the image on PRD DC
               def destDC = openshift.selector("dc", "${destApp}").object()
               echo "Prod Tag: ${prodTag}"
-              destDC.spec.template.spec.containers[0].image="image-registry.openshift-image-registry.svc:5000/${devProject}/tasks:${prodTag}"
+              destDC.spec.template.spec.containers[0].image="docker-registry.default.svc:5000/${devProject}/tasks:${prodTag}"
               openshift.apply(destDC)
               def containerImage = destDC.spec.template.spec.containers[0].image
               echo "Container Image ${containerImage}"
