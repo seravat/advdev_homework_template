@@ -224,59 +224,13 @@ podTemplate(
       }
 
       stage('Switch over to new Version') {
-
-        echo "Executing production switch"
-        // After approval execute the switch
-        script{
-          openshift.withCluster() {
-            openshift.withProject("${prodProject}") {
-              activeApp = openshift.selector("route", "tasks").object().spec.to.name
-
-              echo "The running App is ${activeApp}"
-              destApp = activeApp == 'tasks-blue' ? 'tasks-green' : 'tasks-blue'
-
-              //Update the image on PRD DC
-              def destDC = openshift.selector("dc", "${destApp}").object()
-              echo "Prod Tag: ${prodTag}"
-              destDC.spec.template.spec.containers[0].image="docker-registry.default.svc:5000/${devProject}/tasks:${prodTag}"
-              openshift.apply(destDC)
-              def containerImage = destDC.spec.template.spec.containers[0].image
-              echo "Container Image ${containerImage}"
-
-              //Deploy the dest application
-              openshift.selector("dc", "${destApp}").rollout().latest()
-
-              //Wait until app is Running
-              def dc = openshift.selector("dc", "${destApp}").object()
-              def dc_version = dc.status.latestVersion
-              def rc = openshift.selector("rc", "${destApp}-${dc_version}").object()
-
-              echo "Waiting for ReplicationController ${destApp}-${dc_version} to be ready"
-              while (rc.spec.replicas != rc.status.readyReplicas) {
-                sleep 5
-                rc = openshift.selector("rc", "${destApp}-${dc_version}").object()
-              }
-
-              def route = openshift.selector("route", "tasks").object()
-              route.spec.to.name = "${destApp}"
-              openshift.apply(route)
-
-            }
-          }
-        }
-      }
-
-      stage('Switch to blue') {
         echo "Switching Production application to ${destApp}."
         script {
-          openshift.withCluster() {
-              openshift.withProject(prodProject) {
-
-                def route = openshift.selector("route", "tasks").object()
-                route.spec.to.name = "tasks-blue"
-                openshift.apply(route)
-              }
-          }
+            openshift.withCluster() {
+                openshift.withProject(prodProject) {
+                    openshift.patch("route/tasks", "'{\"spec\":{\"to\":{\"name\":\"${destApp}\"}}}'")
+                }
+            }
         }
       }
     }
