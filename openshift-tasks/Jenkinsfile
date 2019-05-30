@@ -223,9 +223,6 @@ podTemplate(
       }
 
       stage('Switch over to new Version') {
-      steps {
-        // Stop for approval
-        input "Switch Production?"
 
         echo "Executing production switch"
         // After approval execute the switch
@@ -266,12 +263,8 @@ podTemplate(
             }
           }
         }
-
-
       }
     }
-    }
-  }
   }
 
 
